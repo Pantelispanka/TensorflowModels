@@ -6,7 +6,7 @@ import random
 
 import math
 
-mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+# mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
 
 def unpickle(file):
@@ -15,12 +15,12 @@ def unpickle(file):
         return dict
 
 
-X1 = unpickle('/Users/pantelispanka/Python/pythonNotebook/data/cifar-10-batches-py/data_batch_1')
-X2 = unpickle('/Users/pantelispanka/Python/pythonNotebook/data/cifar-10-batches-py/data_batch_2')
-X3 = unpickle('/Users/pantelispanka/Python/pythonNotebook/data/cifar-10-batches-py/data_batch_3')
-X4 = unpickle('/Users/pantelispanka/Python/pythonNotebook/data/cifar-10-batches-py/data_batch_4')
-X5 = unpickle('/Users/pantelispanka/Python/pythonNotebook/data/cifar-10-batches-py/data_batch_5')
-X6 = unpickle('/Users/pantelispanka/Python/pythonNotebook/data/cifar-10-batches-py/test_batch')
+X1 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_1')
+X2 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_2')
+X3 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_3')
+X4 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_4')
+X5 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_5')
+X6 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/test_batch')
 
 cifarTestDataMatrix = X6[b'data']
 cifarTestDataLabelsToVec = X6[b'labels']
