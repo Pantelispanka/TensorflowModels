@@ -62,6 +62,54 @@ b_fc2 = bias_variable([10])
 y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
 
+conv_1 = tf.layers.conv2d(inputs=neuralinput,
+                          filters=64,
+                          kernel_size=[5, 5],
+                          padding="same",
+                          activation=tf.nn.relu)
+
+pool_1 = tf.layers.max_pooling2d(inputs=conv_1, pool_size=[2, 2], strides=2)
+
+conv_2 = tf.layers.conv2d(
+      inputs=pool_1,
+      filters=128,
+      kernel_size=[5, 5],
+      padding="same",
+      activation=tf.nn.relu)
+
+pool_2 = tf.layers.max_pooling2d(inputs=conv_2, pool_size=[2, 2], strides=2)
+
+conv_3 = tf.layers.conv2d(
+      inputs=pool_2,
+      filters=256,
+      kernel_size=[5, 5],
+      padding="same",
+      activation=tf.nn.relu)
+
+pool_3 = tf.layers.max_pooling2d(inputs=conv_3, pool_size=[2, 2], strides=2)
+
+pool3_flat = tf.reshape(pool_3, [-1, 4 * 4 * 256])
+dense = tf.layers.dense(inputs=pool3_flat, units=1024, activation=tf.nn.relu)
+dropout = tf.layers.dropout(
+      inputs=dense, rate=0.4, training=tf.estimator.ModeKeys.TRAIN)
+
+output = tf.layers.dense(inputs=dropout, units=10)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=labels, logits=y_conv))
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 # train_step = tf.train.AdadeltaOptimizer(1e-4).minimize(cross_entropy)
