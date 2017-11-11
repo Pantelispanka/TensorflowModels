@@ -12,6 +12,8 @@ class Cifar10Dataset:
 
     cifarTrainDataMatrix = []
     cifarTrainDataMatrixLabels = []
+    cifarTrainDataMatrixWithNoise = []
+    cifarTrainDataMatrixLabelsWithNoise = []
     cifarTestDataMatrix = []
     cifarTestDataMatrixLabels = []
 
@@ -21,21 +23,18 @@ class Cifar10Dataset:
     cifarTrainData = []
     cifarTestData = []
 
-    def __init__(self, datapath, flip, contrast, satur, hue):
+    def __init__(self, datapath):
         # self.data = data
         self.read_data(datapath)
         self.add_noise()
-        # self.add_flip_batch(flip=flip)
-        # self.add_contrast(contr=contrast)
-        # self.add_saturation(saturation=satur)
-        # self.add_hue(hue=hue)
         self.one_hot_train_labels()
         self.one_hot_test_labels()
         self.train_data_normalization()
         self.test_data_normalization()
-        # self.train_data_batch()
 
-    # Read the dataset as downloaded from its original source
+
+
+    # Reada the dataset as downloaded from its original source
     def read_data(self, datapath):
         X1 = self.unpickle(datapath + '/data_batch_1')
         X2 = self.unpickle(datapath + 'data_batch_2')
@@ -50,7 +49,7 @@ class Cifar10Dataset:
 
     # creates a one hot vector for the train labels
     def one_hot_train_labels(self):
-        for i in range(50000):
+        for i in range(len(self.cifarTrainDataMatrixLabels)):
             if self.cifarTrainDataMatrixLabels[i] == 1:
                 self.cifarOneHotTrain.append([0., 1., 0., 0., 0., 0., 0., 0., 0., 0.])
             elif self.cifarTrainDataMatrixLabels[i] == 2:
@@ -71,6 +70,7 @@ class Cifar10Dataset:
                 self.cifarOneHotTrain.append([0., 0., 0., 0., 0., 0., 0., 0., 0., 1.])
             elif self.cifarTrainDataMatrixLabels[i] == 0:
                 self.cifarOneHotTrain.append([1., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        print("Size of one hot train labels = ", len(self.cifarOneHotTrain))
         return self.cifarOneHotTrain
 
     # creates a one hot vector for the test labels
@@ -131,6 +131,8 @@ class Cifar10Dataset:
             if saturation == "y":
                 saturation_size = input("Please enter the size of the Saturated batch: ")
                 for i in range(int(saturation_size)):
+                    if i % 100 == 0:
+                        print("Added ", i, "saturated images")
                     l = random.randint(0, 49999)
                     image = tf.reshape(self.cifarTrainDataMatrix[l], [32, 32, 3])
                     noised = tf.image.random_saturation(image, 0.2, 1.4)
@@ -143,6 +145,8 @@ class Cifar10Dataset:
             if flip == "y":
                 flip_size = input("Please enter the size of the Flipped batch: ")
                 for i in range(int(flip_size)):
+                    if i % 100 == 0:
+                        print("Added", i, "random flipped images")
                     l = random.randint(0, 49999)
                     image = tf.reshape(self.cifarTrainDataMatrix[l], [32, 32, 3])
                     noised = tf.image.random_flip_left_right(image)
@@ -156,6 +160,8 @@ class Cifar10Dataset:
             if contrast == "y":
                 contr_size = input("Please enter the size of the Contrasted batch: ")
                 for i in range(int(contr_size)):
+                    if i % 100 == 0:
+                        print("Added ", i, "random contrasted images")
                     l = random.randint(0, 49999)
                     image = tf.reshape(self.cifarTrainDataMatrix[l], [32, 32, 3])
                     noised = tf.image.random_contrast(image, 0.2, 1.4)
@@ -168,6 +174,8 @@ class Cifar10Dataset:
             if hue == "y":
                 hue_size = input("Please enter the size of the Hued batch: ")
                 for i in range(int(hue_size)):
+                    if i % 100 == 0:
+                        print("Added ", i, "random hue images")
                     l = random.randint(0, 49999)
                     image = tf.reshape(self.cifarTrainDataMatrix[l], [32, 32, 3])
                     noised = tf.image.random_hue(image, 0.1)
@@ -176,6 +184,9 @@ class Cifar10Dataset:
                     self.cifarTrainDataMatrixLabels = np.append(self.cifarTrainDataMatrixLabels,
                                                                 self.cifarTrainDataMatrixLabels[l])
                     self.cifarTrainDataMatrix = np.concatenate((self.cifarTrainDataMatrix, noised_tensor.eval(session=sess)))
+        print("The generated dataset consists of "
+              , len(self.cifarTrainDataMatrix), "images in array form and"
+              , len(self.cifarTrainDataMatrixLabels), "labels in one hot vector form")
 
     # # Adds a randow hue batch
     # def add_hue(self, hue):
@@ -240,14 +251,20 @@ class Cifar10Dataset:
     def train_data_batch(self, batch_size):
         train_data = []
         train_labels = []
-        print("The generated dataset consists of ", len(self.cifarTrainDataMatrix), "images in array form and"
-              ,  len(self.cifarTrainDataMatrixLabels), "labels in one hot vector form")
         for i in range(batch_size):
-            l = random.randint(0, len(self.cifarTrainDataMatrix))
+            l = random.randint(0, len(self.cifarTrainDataMatrix)-1)
             train_data.append(self.cifarTrainData[l])
             train_labels.append(self.cifarOneHotTrain[l])
         return train_data, train_labels
 
+    def train_data_for_eval(self):
+        train_data = []
+        train_labels = []
+        for i in range(10000):
+            l = random.randint(0, len(self.cifarTrainDataMatrix)-1)
+            train_data.append(self.cifarTrainData[l])
+            train_labels.append(self.cifarOneHotTrain[l])
+        return train_data, train_labels
 
 
     @staticmethod
@@ -256,5 +273,5 @@ class Cifar10Dataset:
             dictp = pickle.load(fo, encoding='bytes')
             return dictp
 
-print(Cifar10Dataset("/Users/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/"
-                     , True, True, True, True).train_data_batch(batch_size=10))
+# print(Cifar10Dataset("/home/pantelispanka/Python/TensorflowModels/cifar_10_models/cifar-10-batches-py/"
+#                      , True, True, True, True).train_data_batch(batch_size=10))

@@ -3,11 +3,9 @@ import numpy as np
 import pickle
 from tensorflow.examples.tutorials.mnist import input_data
 import random
+from Cifar10Data import Cifar10Dataset
 
-import math
-
-# mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
-
+cifar10Data = Cifar10Dataset("/home/pantelispanka/Python/TensorflowModels/cifar_10_models/cifar-10-batches-py/")
 
 def unpickle(file):
     with open(file, 'rb') as fo:
@@ -15,12 +13,12 @@ def unpickle(file):
         return dict
 
 
-X1 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_1')
-X2 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_2')
-X3 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_3')
-X4 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_4')
-X5 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/data_batch_5')
-X6 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar10_models/cifar-10-batches-py/test_batch')
+X1 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar_10_models/cifar-10-batches-py/data_batch_1')
+X2 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar_10_models/cifar-10-batches-py/data_batch_2')
+X3 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar_10_models/cifar-10-batches-py/data_batch_3')
+X4 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar_10_models/cifar-10-batches-py/data_batch_4')
+X5 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar_10_models/cifar-10-batches-py/data_batch_5')
+X6 = unpickle('/home/pantelispanka/Python/TensorflowModels/cifar_10_models/cifar-10-batches-py/test_batch')
 
 cifarTestDataMatrix = X6[b'data']
 cifarTestDataLabelsToVec = X6[b'labels']
@@ -88,7 +86,7 @@ cifarTestData = {'data': ((cifarTestDataMatrix / 255) - np.mean(cifarTestDataMat
 #Parameters
 n_hidden1 = 2200
 n_hidden2 = 800
-n_input = 784 #3072
+n_input = 3072
 
 
 neulalinput = tf.placeholder(tf.float32, [None, n_input])
@@ -125,41 +123,41 @@ optimizer = tf.train.GradientDescentOptimizer(0.05).minimize(cost)
 
 init = tf.global_variables_initializer()
 
-# with tf.Session() as sess:
-#     sess.run(init)
+with tf.Session() as sess:
+    sess.run(init)
+
+    image_batch = []
+    label_batch = []
+
+    for i in range(200000):
+        # image_batch = image_batch.append(cifarTrainData['data'][i])
+        # label_batch = label_batch.append(cifarTrainData['labels'][i])
+        image_batch.clear()
+        label_batch.clear()
+        for j in range(228):
+            l = random.randint(0, 49999)
+            image_batch.append(cifarTrainData['data'][l])
+            label_batch.append(cifarTrainData['labels'][l])
+
+        print(sess.run([optimizer, cost], feed_dict={neulalinput: image_batch, labels: label_batch}))
+
+    correct_prediction = tf.equal(tf.argmax(model, 1), tf.argmax(labels, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    print(sess.run([accuracy, cost], feed_dict={neulalinput: cifarTestData['data'], labels: cifarTestData['labels']}))
+
+
+# sess = tf.InteractiveSession()
 #
-#     image_batch = []
-#     label_batch = []
+# tf.global_variables_initializer().run()
 #
-#     for i in range(100):
-#         # image_batch = image_batch.append(cifarTrainData['data'][i])
-#         # label_batch = label_batch.append(cifarTrainData['labels'][i])
-#         image_batch.clear()
-#         label_batch.clear()
-#         for j in range(228):
-#             l = random.randint(0, 49999)
-#             image_batch.append(cifarTrainData['data'][l])
-#             label_batch.append(cifarTrainData['labels'][l])
+# for _ in range(1000):
+#     # writer = tf.summary.FileWriter('./graphs', sess.graph)
+#     batch_xs, batch_ys = mnist.train.next_batch(100)
+#     print(sess.run([optimizer, cost], feed_dict={neulalinput: batch_xs, labels: batch_ys}))
 #
-#         print(sess.run([optimizer, cost], feed_dict={neulalinput: image_batch, labels: label_batch}))
 #
-#     correct_prediction = tf.equal(tf.argmax(model, 1), tf.argmax(labels, 1))
-#     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-#     print(sess.run([accuracy, cost], feed_dict={neulalinput: cifarTestData['data'], labels: cifarTestData['labels']}))
-
-
-sess = tf.InteractiveSession()
-
-tf.global_variables_initializer().run()
-
-for _ in range(1000):
-  # writer = tf.summary.FileWriter('./graphs', sess.graph)
-  batch_xs, batch_ys = mnist.train.next_batch(100)
-  print(sess.run([optimizer, cost], feed_dict={neulalinput: batch_xs, labels: batch_ys}))
-
-
-correct_prediction = tf.equal(tf.argmax(model, 1), tf.argmax(labels, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-batch_xs, batch_ys = mnist.train.next_batch(1000)
-print(sess.run(accuracy, feed_dict={neulalinput: batch_xs, labels: batch_ys}))
-print(sess.run(accuracy, feed_dict={neulalinput: mnist.test.images, labels: mnist.test.labels}))
+# correct_prediction = tf.equal(tf.argmax(model, 1), tf.argmax(labels, 1))
+# accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+# batch_xs, batch_ys = mnist.train.next_batch(1000)
+# print(sess.run(accuracy, feed_dict={neulalinput: batch_xs, labels: batch_ys}))
+# print(sess.run(accuracy, feed_dict={neulalinput: mnist.test.images, labels: mnist.test.labels}))
